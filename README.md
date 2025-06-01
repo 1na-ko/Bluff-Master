@@ -1,2 +1,3 @@
-# Bluff-
-bluff大师-微信小游戏
+# Bluff-Master
+bluff大师
+基于cocos游戏引擎的微信小游戏
