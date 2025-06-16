@@ -1,0 +1,535 @@
+/**index.scss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #1a1a2e;
+  color: white;
+  touch-action: manipulation;
+}
+
+#gameContainer {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* 开始界面 */
+#startScreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d3561 100%);
+  z-index: 1000;
+}
+
+.gameTitle {
+  font-size: 3.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 0 30px #00d4ff;
+  color: #00d4ff;
+  letter-spacing: 0.2rem;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 20px #00d4ff, 0 0 30px #00d4ff;
+  }
+
+  to {
+    text-shadow: 0 0 30px #00d4ff, 0 0 40px #00d4ff, 0 0 50px #00d4ff;
+  }
+}
+
+.startButton {
+  padding: 1rem 3rem;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+}
+
+.startButton:active {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+}
+
+/* 游戏区域 */
+.playerArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  position: relative;
+}
+
+#computerArea {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  padding-top: 130rpx;
+}
+
+.playerName {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.cardCount {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 0.3rem;
+  margin-top: 5%;
+}
+
+/* 卡牌样式 */
+.card {
+  // 基础样式
+  width: 35px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.card {
+  &.selected {
+    width: 70px;
+    height: 100px;
+    transform: translateY(-10px);
+    border-color: #00d4ff;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+  }
+
+  &.unselected {
+    width: 70px;
+    height: 100px;
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.cardBack {
+  background: linear-gradient(135deg, #2d3561 0%, #1a1a2e 100%);
+  color: #00d4ff;
+  font-size: 1.5rem;
+}
+
+/* 各语言卡牌颜色 */
+.card-cpp {
+  background: linear-gradient(135deg, #004482 0%, #0066cc 100%);
+  color: white;
+}
+
+.card-csharp {
+  background: linear-gradient(135deg, #68217a 0%, #9b4f96 100%);
+  color: white;
+}
+
+.card-go {
+  background: linear-gradient(135deg, #00add8 0%, #00d4ff 100%);
+  color: #1a1a2e;
+}
+
+.card-java {
+  background: linear-gradient(135deg, #f89820 0%, #ff6b35 100%);
+  color: white;
+}
+
+.card-javascript {
+  background: linear-gradient(135deg, #f7df1e 0%, #ffd93d 100%);
+  color: #323330;
+}
+
+.card-php {
+  background: linear-gradient(135deg, #777bb4 0%, #8993be 100%);
+  color: white;
+}
+
+.card-python {
+  background: linear-gradient(135deg, #3776ab 0%, #ffd43b 100%);
+  color: white;
+}
+
+.card-ruby {
+  background: linear-gradient(135deg, #cc342d 0%, #e74c3c 100%);
+  color: white;
+}
+
+.card-hello {
+  background: linear-gradient(135deg, #7c4dff 0%, #b388ff 100%);
+  color: white;
+}
+
+.cardIcon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cardText {
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* 手牌容器 */
+.handContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+  margin-top: 1rem;
+}
+
+/* 中央游戏区 */
+#centralArea {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+  background-color: #004382e3;
+  width: 60%;
+  padding: 5%;
+  border-radius: 20px;
+}
+
+#currentDeclare {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+#tableCards {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.tableCard {
+  width: 50px;
+  height: 70px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2d3561 0%, #1a1a2e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #00d4ff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 操作按钮 */
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.actionButton {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: white;
+}
+
+.believeButton {
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+}
+
+.challengeButton {
+  background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+}
+
+.confirmButton {
+  background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+}
+
+.actionButton:active {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 声明选择器 */
+#declareSelector {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(26, 26, 46, 0.95);
+  padding: 2rem;
+  border-radius: 15px;
+  z-index: 100;
+  width: 70%;
+  max-width: 500px;
+}
+
+.declareTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #00d4ff;
+}
+
+.declareOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.declareOption {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+
+  &.selected {
+    background-color: #00d4ff;
+    color: white;
+    border-color: #00a8d7;
+    transform: scale(1.05);
+  }
+}
+
+.quantityButton {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+
+  &.selected {
+    background-color: #00d4ff;
+    color: white;
+    border-color: #00a8d7;
+    transform: scale(1.1);
+  }
+}
+
+.quantitySelector {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.quantityButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #00d4ff;
+  background: transparent;
+  color: #00d4ff;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.quantityButton:active {
+  background: #00d4ff;
+  color: #1a1a2e;
+}
+
+.quantityButton.selected {
+  background: #00d4ff;
+  color: #1a1a2e;
+}
+
+/* 消息提示 */
+.gameMessage {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  z-index: 200;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 胜利画面 */
+#winScreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.winTitle {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+.winnerName {
+  font-size: 2rem;
+  margin-bottom: 3rem;
+  color: #00d4ff;
+}
+
+.restartButton {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  border: none;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.restartButton:active {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+}
+
+.confirmButton {
+  &.disabled {
+    opacity: 0.5;
+    background-color: #cccccc;
+    color: #666666;
+  }
+}
+
+#computerHand {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 300px;
+  /* 5张牌*50px宽度 */
+  margin: 0 auto;
+
+  .card {
+    margin: 5px;
+    pointer-events: none;
+    /* 禁用点击 */
+
+    &:active {
+      transform: none !important;
+      /* 移除点击效果 */
+    }
+  }
+}
+
+.scrollarea {
+  flex: 1;
+  overflow-y: hidden;
+}
+
+.userinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #aaa;
+  width: 80%;
+}
+
+.userinfo-avatar {
+  overflow: hidden;
+  width: 128rpx;
+  height: 128rpx;
+  margin: 20rpx;
+  border-radius: 50%;
+}
+
+.usermotto {
+  margin-top: 200px;
+}
+
+.avatar-wrapper {
+  padding: 0;
+  width: 56px !important;
+  border-radius: 8px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.avatar {
+  display: block;
+  width: 56px;
+  height: 56px;
+}
+
+.nickname-wrapper {
+  display: flex;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  border-top: .5px solid rgba(0, 0, 0, 0.1);
+  border-bottom: .5px solid rgba(0, 0, 0, 0.1);
+  color: black;
+}
+
+.nickname-label {
+  width: 105px;
+}
+
+.nickname-input {
+  flex: 1;
+}

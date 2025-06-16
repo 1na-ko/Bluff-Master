@@ -1,3 +1,6 @@
+# 提示
+**miniprogram-1** 文件夹为WXML+SCSS+TS开发的微信小程序源码
+
 # Bluff-Master
 bluff大师
 基于cocos游戏引擎的微信小游戏

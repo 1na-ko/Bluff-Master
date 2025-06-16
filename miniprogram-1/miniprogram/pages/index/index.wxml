@@ -1,0 +1,89 @@
+<!--index.wxml-->
+<view id="gameContainer">
+  <!-- 开始界面 -->
+  <view id="startScreen" wx:if="{{!gameStarted}}">
+    <text class="gameTitle">BLUFF
+MASTER</text>
+    <button class="startButton" bindtap="startGame">开始游戏</button>
+  </view>
+
+  <!-- 游戏区域 -->
+  <view wx:else>
+    <!-- 电脑区域 -->
+    <view id="computerArea" class="playerArea">
+      <view class="playerName">电脑</view>
+      <view class="cardCount">剩余: <text id="computerCardCount">{{computerHand.length}}</text> 张</view>
+      <view id="computerHand" class="handContainer">
+        <block wx:for="{{computerHand}}" wx:key="id">
+          <view class="card cardBack" wx:if="{{index < 5}}">?</view>
+        </block>
+        <block wx:if="{{computerHand.length > 5}}">
+          <block wx:for="{{computerHand}}" wx:key="id" wx:for-item="item" wx:for-index="index">
+            <view class="card cardBack" wx:if="{{index >= 5 && index < 10}}">?</view>
+          </block>
+        </block>
+        <block wx:if="{{computerHand.length > 10}}">
+          <block wx:for="{{computerHand}}" wx:key="id" wx:for-item="item" wx:for-index="index">
+            <view class="card cardBack" wx:if="{{index >= 10 && index < 15}}">?</view>
+          </block>
+        </block>
+      </view>
+    </view>
+
+    <!-- 中央游戏区 -->
+    <view id="centralArea" wx:if="{{showCentralArea}}">
+      <view id="currentDeclare" wx:if="{{currentDeclare}}">
+        当前声明: <text id="declareText">{{currentDeclare.quantity}} 张 {{currentDeclare.type}}</text>
+      </view>
+      <view id="tableCards" class="tableCards">
+        <block wx:for="{{tableCards}}" wx:key="index">
+          <view class="tableCard">?</view>
+        </block>
+      </view>
+      <view id="playerActions" class="actionButtons" wx:if="{{showPlayerActions && !isPlayerTurn}}">
+        <button class="actionButton believeButton" bindtap="believe">相信</button>
+        <button class="actionButton challengeButton" bindtap="challenge">质疑</button>
+      </view>
+    </view>
+
+    <!-- 玩家区域 -->
+    <view id="playerArea" class="playerArea">
+      <view id="playerHand" class="handContainer">
+        <block wx:for="{{playerHand}}" wx:key="id">
+          <view class="card card-{{item.type.toLowerCase()}} {{item.selected ? 'selected' : 'unselected'}}" 
+              bindtap="selectCard" data-index="{{index}}">
+          <view class="cardIcon">{{cardIcons[item.type]}}</view>
+          <view class="cardText">{{item.type}}</view>
+          </view>
+        </block>
+      </view>
+      <view class="cardCount">剩余: <text id="playerCardCount">{{playerHand.length}}</text> 张</view>
+      <view class="playerName">你</view>
+      <view id="playerDeclareActions" class="actionButtons" wx:if="{{isPlayerTurn}}">
+        <button class="actionButton confirmButton {{selectedCards.length === 0 ? 'disabled' : ''}}" bindtap="confirmPlay">确认出牌</button>
+      </view>
+    </view>
+
+    <!-- 声明选择器 -->
+    <view id="declareSelector" wx:if="{{showDeclareSelector}}">
+      <view class="declareTitle">选择要声明的牌型</view>
+      <view class="declareOptions">
+        <block wx:for="{{cardTypes}}" wx:key="item">
+          <view class="declareOption {{selectedDeclareType === item ? 'selected' : ''}}" 
+                bindtap="selectDeclareType" data-card="{{item}}">{{item}}</view>
+        </block>
+      </view>
+      <button class="actionButton confirmButton" bindtap="confirmDeclare">确认声明</button>
+    </view>
+
+    <!-- 游戏消息 -->
+    <view id="gameMessage" wx:if="{{showMessage}}" class="gameMessage">{{message}}</view>
+
+    <!-- 胜利画面 -->
+    <view id="winScreen" wx:if="{{showWinScreen}}">
+      <text class="winTitle">游戏结束</text>
+      <text class="winnerName">{{winnerName}}</text>
+      <button class="restartButton" bindtap="restartGame">再来一局</button>
+    </view>
+  </view>
+</view>

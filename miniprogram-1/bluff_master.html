@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bluff Master - 编程语言牌游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        /* 开始界面 */
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #2d3561 100%);
+            z-index: 1000;
+        }
+
+        .gameTitle {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 30px #00d4ff;
+            color: #00d4ff;
+            letter-spacing: 0.2rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00d4ff, 0 0 30px #00d4ff; }
+            to { text-shadow: 0 0 30px #00d4ff, 0 0 40px #00d4ff, 0 0 50px #00d4ff; }
+        }
+
+        .startButton {
+            padding: 1rem 3rem;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .startButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+        }
+
+        /* 游戏区域 */
+        .playerArea {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        #computerArea {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .playerName {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .cardCount {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 1rem;
+        }
+
+        /* 卡牌样式 */
+        .card {
+            width: 70px;
+            height: 100px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .card.selected {
+            transform: translateY(-20px);
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        }
+
+        .cardBack {
+            background: linear-gradient(135deg, #2d3561 0%, #1a1a2e 100%);
+            color: #00d4ff;
+            font-size: 1.5rem;
+        }
+
+        /* 各语言卡牌颜色 */
+        .card-cpp { background: linear-gradient(135deg, #004482 0%, #0066cc 100%); color: white; }
+        .card-csharp { background: linear-gradient(135deg, #68217a 0%, #9b4f96 100%); color: white; }
+        .card-go { background: linear-gradient(135deg, #00add8 0%, #00d4ff 100%); color: #1a1a2e; }
+        .card-java { background: linear-gradient(135deg, #f89820 0%, #ff6b35 100%); color: white; }
+        .card-javascript { background: linear-gradient(135deg, #f7df1e 0%, #ffd93d 100%); color: #323330; }
+        .card-php { background: linear-gradient(135deg, #777bb4 0%, #8993be 100%); color: white; }
+        .card-python { background: linear-gradient(135deg, #3776ab 0%, #ffd43b 100%); color: white; }
+        .card-ruby { background: linear-gradient(135deg, #cc342d 0%, #e74c3c 100%); color: white; }
+        .card-hello { background: linear-gradient(135deg, #7c4dff 0%, #b388ff 100%); color: white; }
+
+        .cardIcon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cardText {
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        /* 手牌容器 */
+        .handContainer {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* 中央游戏区 */
+        #centralArea {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        #currentDeclare {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        #tableCards {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .tableCard {
+            width: 50px;
+            height: 70px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #2d3561 0%, #1a1a2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #00d4ff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 操作按钮 */
+        .actionButtons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .actionButton {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .believeButton {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+        }
+
+        .challengeButton {
+            background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+        }
+
+        .confirmButton {
+            background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+        }
+
+        .actionButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .actionButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 声明选择器 */
+        #declareSelector {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1.5rem;
+            border-radius: 15px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            max-width: 90%;
+            display: none;
+        }
+
+        .declareTitle {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .declareOptions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .declareOption {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .declareOption:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00d4ff;
+        }
+
+        .declareOption.selected {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+        }
+
+        .quantitySelector {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .quantityButton {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #00d4ff;
+            background: transparent;
+            color: #00d4ff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .quantityButton:hover {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        .quantityButton.selected {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        /* 消息提示 */
+        #gameMessage {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            display: none;
+            z-index: 200;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 胜利画面 */
+        #winScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .winTitle {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        .winnerName {
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            color: #00d4ff;
+        }
+
+        .restartButton {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .restartButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- 开始界面 -->
+        <div id="startScreen">
+            <h1 class="gameTitle">BLUFF<br>MASTER</h1>
+            <button class="startButton" onclick="startGame()">开始游戏</button>
+        </div>
+
+        <!-- 电脑区域 -->
+        <div id="computerArea" class="playerArea">
+            <div class="playerName">电脑</div>
+            <div class="cardCount">剩余: <span id="computerCardCount">10</span> 张</div>
+            <div id="computerHand" class="handContainer"></div>
+        </div>
+
+        <!-- 中央游戏区 -->
+        <div id="centralArea">
+            <div id="currentDeclare" style="display: none;">
+                当前声明: <span id="declareText">-</span>
+            </div>
+            <div id="tableCards"></div>
+            <div id="playerActions" class="actionButtons" style="display: none;">
+                <button class="actionButton believeButton" onclick="believe()">相信</button>
+                <button class="actionButton challengeButton" onclick="challenge()">质疑</button>
+            </div>
+        </div>
+
+        <!-- 玩家区域 -->
+        <div id="playerArea" class="playerArea">
+            <div id="playerHand" class="handContainer"></div>
+            <div class="cardCount">剩余: <span id="playerCardCount">10</span> 张</div>
+            <div class="playerName">你</div>
+            <div id="playerDeclareActions" class="actionButtons" style="display: none;">
+                <button class="actionButton confirmButton" onclick="confirmPlay()">确认出牌</button>
+            </div>
+        </div>
+
+        <!-- 声明选择器 -->
+        <div id="declareSelector">
+            <div class="declareTitle">选择要声明的牌型</div>
+            <div class="declareOptions">
+                <div class="declareOption" data-card="C++">C++</div>
+                <div class="declareOption" data-card="C#">C#</div>
+                <div class="declareOption" data-card="Go">Go</div>
+                <div class="declareOption" data-card="Java">Java</div>
+                <div class="declareOption" data-card="JavaScript">JS</div>
+                <div class="declareOption" data-card="PHP">PHP</div>
+                <div class="declareOption" data-card="Python">Python</div>
+                <div class="declareOption" data-card="Ruby">Ruby</div>
+            </div>
+            <div class="quantitySelector">
+                <button class="quantityButton" data-quantity="1">1</button>
+                <button class="quantityButton" data-quantity="2">2</button>
+                <button class="quantityButton" data-quantity="3">3</button>
+                <button class="quantityButton" data-quantity="4">4</button>
+            </div>
+            <button class="actionButton confirmButton" onclick="confirmDeclare()">确认声明</button>
+        </div>
+
+        <!-- 游戏消息 -->
+        <div id="gameMessage"></div>
+
+        <!-- 胜利画面 -->
+        <div id="winScreen">
+            <h2 class="winTitle">游戏结束</h2>
+            <div class="winnerName" id="winnerName"></div>
+            <button class="restartButton" onclick="restartGame()">再来一局</button>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        let gameState = {
+            playerHand: [],
+            computerHand: [],
+            tableCards: [],
+            currentPlayer: null,
+            currentDeclare: null,
+            selectedCards: [],
+            selectedDeclareType: null,
+            selectedDeclareQuantity: null,
+            isPlayerTurn: false,
+            gameStarted: false
+        };
+
+        // 卡牌类型
+        const cardTypes = ['C++', 'C#', 'Go', 'Java', 'JavaScript', 'PHP', 'Python', 'Ruby'];
+        const cardIcons = {
+            'C++': 'C++',
+            'C#': 'C#',
+            'Go': 'Go',
+            'Java': '☕',
+            'JavaScript': 'JS',
+            'PHP': '🐘',
+            'Python': '🐍',
+            'Ruby': '💎',
+            'Hello World': '⭐'
+        };
+
+        // 初始化牌组
+        function createDeck() {
+            const deck = [];
+            
+            // 每种语言4张
+            cardTypes.forEach(type => {
+                for (let i = 0; i < 4; i++) {
+                    deck.push({ type, id: `${type}-${i}` });
+                }
+            });
+            
+            // 8张万能牌
+            for (let i = 0; i < 8; i++) {
+                deck.push({ type: 'Hello World', id: `hello-${i}` });
+            }
+            
+            return deck;
+        }
+
+        // 洗牌
+        function shuffle(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 开始游戏
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            
+            // 初始化游戏
+            const deck = shuffle(createDeck());
+            gameState.playerHand = deck.slice(0, 10);
+            gameState.computerHand = deck.slice(10, 20);
+            gameState.tableCards = [];
+            gameState.currentPlayer = Math.random() < 0.5 ? 'player' : 'computer';
+            gameState.gameStarted = true;
+            
+            renderGame();
+            
+            if (gameState.currentPlayer === 'computer') {
+                setTimeout(computerTurn, 1000);
+            } else {
+                showMessage('你先手！选择要出的牌');
+                gameState.isPlayerTurn = true;
+            }
+        }
+
+        // 渲染游戏界面
+        function renderGame() {
+            renderPlayerHand();
+            renderComputerHand();
+            updateCardCounts();
+            renderTableCards();
+        }
+
+        // 渲染玩家手牌
+        function renderPlayerHand() {
+            const container = document.getElementById('playerHand');
+            container.innerHTML = '';
+            
+            gameState.playerHand.forEach((card, index) => {
+                const cardElement = createCardElement(card, true);
+                cardElement.onclick = () => selectCard(index);
+                container.appendChild(cardElement);
+            });
+        }
+
+        // 渲染电脑手牌
+        function renderComputerHand() {
+            const container = document.getElementById('computerHand');
+            container.innerHTML = '';
+            
+            gameState.computerHand.forEach(() => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card cardBack';
+                cardElement.innerHTML = '?';
+                container.appendChild(cardElement);
+            });
+        }
+
+        // 创建卡牌元素
+        function createCardElement(card, isPlayer = false) {
+            const element = document.createElement('div');
+            const typeClass = card.type.toLowerCase().replace(/\+/g, 'p').replace(/#/g, 'sharp').replace(' ', '');
+            element.className = `card card-${typeClass}`;
+            element.dataset.cardId = card.id;
+            
+            if (isPlayer && gameState.selectedCards.includes(card.id)) {
+                element.classList.add('selected');
+            }
+            
+            element.innerHTML = `
+                <div class="cardIcon">${cardIcons[card.type]}</div>
+                <div class="cardText">${card.type}</div>
+            `;
+            
+            return element;
+        }
+
+        // 选择卡牌
+        function selectCard(index) {
+            if (!gameState.isPlayerTurn) return;
+            
+            const card = gameState.playerHand[index];
+            const cardId = card.id;
+            
+            const selectedIndex = gameState.selectedCards.indexOf(cardId);
+            if (selectedIndex > -1) {
+                gameState.selectedCards.splice(selectedIndex, 1);
+            } else {
+                gameState.selectedCards.push(cardId);
+            }
+            
+            renderPlayerHand();
+            
+            // 显示确认按钮
+            if (gameState.selectedCards.length > 0) {
+                document.getElementById('playerDeclareActions').style.display = 'flex';
+            } else {
+                document.getElementById('playerDeclareActions').style.display = 'none';
+            }
+        }
+
+        // 确认出牌
+        function confirmPlay() {
+            if (gameState.selectedCards.length === 0) return;
+            
+            // 显示声明选择器
+            document.getElementById('declareSelector').style.display = 'block';
+            
+            // 重置选择
+            document.querySelectorAll('.declareOption').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.quantityButton').forEach(el => el.classList.remove('selected'));
+            gameState.selectedDeclareType = null;
+            gameState.selectedDeclareQuantity = null;
+        }
+
+        // 选择声明类型
+        document.querySelectorAll('.declareOption').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.declareOption').forEach(el => el.classList.remove('selected'));
+                this.classList.add('selected');
+                gameState.selectedDeclareType = this.dataset.card;
+            });
+        });
+
+        // 选择声明数量
+        document.querySelectorAll('.quantityButton').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.quantityButton').forEach(el => el.classList.remove('selected'));
+                this.classList.add('selected');
+                gameState.selectedDeclareQuantity = parseInt(this.dataset.quantity);
+            });
+        });
+
+        // 确认声明
+        function confirmDeclare() {
+            if (!gameState.selectedDeclareType || !gameState.selectedDeclareQuantity) {
+                showMessage('请选择要声明的牌型和数量');
+                return;
+            }
+            
+            if (gameState.selectedCards.length !== gameState.selectedDeclareQuantity) {
+                showMessage(`请选择 ${gameState.selectedDeclareQuantity} 张牌`);
+                return;
+            }
+            
+            // 执行出牌
+            const playedCards = [];
+            gameState.selectedCards.forEach(cardId => {
+                const index = gameState.playerHand.findIndex(c => c.id === cardId);
+                if (index !== -1) {
+                    playedCards.push(gameState.playerHand.splice(index, 1)[0]);
+                }
+            });
+            
+            gameState.tableCards = playedCards;
+            gameState.currentDeclare = {
+                type: gameState.selectedDeclareType,
+                quantity: gameState.selectedDeclareQuantity,
+                player: 'player'
+            };
+            
+            // 重置状态
+            gameState.selectedCards = [];
+            gameState.isPlayerTurn = false;
+            document.getElementById('declareSelector').style.display = 'none';
+            document.getElementById('playerDeclareActions').style.display = 'none';
+            
+            // 更新界面
+            renderGame();
+            showDeclare();
+            
+            // 检查胜利
+            if (gameState.playerHand.length === 0) {
+                endGame('player');
+                return;
+            }
+            
+            // 电脑回合
+            setTimeout(computerDecision, 1500);
+        }
+
+        // 显示当前声明
+        function showDeclare() {
+            const declareDiv = document.getElementById('currentDeclare');
+            const declareText = document.getElementById('declareText');
+            
+            if (gameState.currentDeclare) {
+                declareText.textContent = `${gameState.currentDeclare.quantity} 张 ${gameState.currentDeclare.type}`;
+                declareDiv.style.display = 'block';
+            } else {
+                declareDiv.style.display = 'none';
+            }
+        }
+
+        // 渲染桌面上的牌
+        function renderTableCards() {
+            const container = document.getElementById('tableCards');
+            container.innerHTML = '';
+            
+            gameState.tableCards.forEach(() => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'tableCard';
+                cardElement.textContent = '?';
+                container.appendChild(cardElement);
+            });
+        }
+
+        // 电脑回合
+        function computerTurn() {
+            showMessage('电脑正在出牌...');
+            
+            setTimeout(() => {
+                // 随机选择出牌数量（1-4张）
+                const quantity = Math.min(Math.floor(Math.random() * 4) + 1, gameState.computerHand.length);
+                
+                // 随机选择牌
+                const selectedIndices = [];
+                while (selectedIndices.length < quantity) {
+                    const index = Math.floor(Math.random() * gameState.computerHand.length);
+                    if (!selectedIndices.includes(index)) {
+                        selectedIndices.push(index);
+                    }
+                }
+                
+                // 出牌
+                const playedCards = [];
+                selectedIndices.sort((a, b) => b - a).forEach(index => {
+                    playedCards.push(gameState.computerHand.splice(index, 1)[0]);
+                });
+                
+                // 随机声明（可能唬人）
+                const declareType = cardTypes[Math.floor(Math.random() * cardTypes.length)];
+                
+                gameState.tableCards = playedCards;
+                gameState.currentDeclare = {
+                    type: declareType,
+                    quantity: quantity,
+                    player: 'computer'
+                };
+                
+                renderGame();
+                showDeclare();
+                showMessage(`电脑声明：${quantity} 张 ${declareType}`);
+                
+                // 检查胜利
+                if (gameState.computerHand.length === 0) {
+                    endGame('computer');
+                    return;
+                }
+                
+                // 显示玩家选项
+                document.getElementById('playerActions').style.display = 'flex';
+            }, 1000);
+        }
+
+        // 电脑决策
+        function computerDecision() {
+            showMessage('电脑正在思考...');
+            
+            setTimeout(() => {
+                // 简单AI：30%概率质疑
+                const shouldChallenge = Math.random() < 0.3;
+                
+                if (shouldChallenge) {
+                    doChallenge('computer');
+                } else {
+                    doBelieve('computer');
+                }
+            }, 1500);
+        }
+
+        // 相信
+        function believe() {
+            document.getElementById('playerActions').style.display = 'none';
+            doBelieve('player');
+        }
+
+        // 执行相信
+        function doBelieve(believer) {
+            showMessage(`${believer === 'player' ? '你' : '电脑'}选择相信`);
+            
+            // 继续游戏，切换出牌方
+            gameState.currentPlayer = believer;
+            
+            setTimeout(() => {
+                if (believer === 'player') {
+                    showMessage('轮到你出牌');
+                    gameState.isPlayerTurn = true;
+                } else {
+                    computerTurn();
+                }
+            }, 1000);
+        }
+
+        // 质疑
+        function challenge() {
+            document.getElementById('playerActions').style.display = 'none';
+            doChallenge('player');
+        }
+
+        // 执行质疑
+        function doChallenge(challenger) {
+            showMessage(`${challenger === 'player' ? '你' : '电脑'}选择质疑！`);
+            
+            setTimeout(() => {
+                // 检查是否说谎
+                const actualCards = gameState.tableCards;
+                const declaredType = gameState.currentDeclare.type;
+                const declaredQuantity = gameState.currentDeclare.quantity;
+                
+                let isBluff = false;
+                let matchCount = 0;
+                
+                actualCards.forEach(card => {
+                    if (card.type === declaredType || card.type === 'Hello World') {
+                        matchCount++;
+                    }
+                });
+                
+                isBluff = matchCount < declaredQuantity;
+                
+                // 显示实际的牌
+                const container = document.getElementById('tableCards');
+                container.innerHTML = '';
+                actualCards.forEach(card => {
+                    const cardElement = createCardElement(card);
+                    container.appendChild(cardElement);
+                });
+                
+                setTimeout(() => {
+                    if (isBluff) {
+                        // 质疑成功
+                        showMessage('质疑成功！对方说谎了！');
+                        
+                        // 说谎者收回牌
+                        const liar = gameState.currentDeclare.player;
+                        if (liar === 'player') {
+                            gameState.playerHand.push(...actualCards);
+                        } else {
+                            gameState.computerHand.push(...actualCards);
+                        }
+                        
+                        // 质疑者开始新一轮
+                        gameState.currentPlayer = challenger;
+                    } else {
+                        // 质疑失败
+                        showMessage('质疑失败！对方没有说谎！');
+                        
+                        // 质疑者收回牌
+                        if (challenger === 'player') {
+                            gameState.playerHand.push(...actualCards);
+                        } else {
+                            gameState.computerHand.push(...actualCards);
+                        }
+                        
+                        // 被质疑者开始新一轮
+                        gameState.currentPlayer = gameState.currentDeclare.player;
+                    }
+                    
+                    // 重置桌面
+                    gameState.tableCards = [];
+                    gameState.currentDeclare = null;
+                    
+                    renderGame();
+                    
+                    // 开始新一轮
+                    setTimeout(() => {
+                        document.getElementById('currentDeclare').style.display = 'none';
+                        document.getElementById('tableCards').innerHTML = '';
+                        
+                        if (gameState.currentPlayer === 'player') {
+                            showMessage('新一轮开始，轮到你出牌');
+                            gameState.isPlayerTurn = true;
+                        } else {
+                            computerTurn();
+                        }
+                    }, 2000);
+                }, 2000);
+            }, 1000);
+        }
+
+        // 更新牌数显示
+        function updateCardCounts() {
+            document.getElementById('playerCardCount').textContent = gameState.playerHand.length;
+            document.getElementById('computerCardCount').textContent = gameState.computerHand.length;
+        }
+
+        // 显示消息
+        function showMessage(message) {
+            const messageDiv = document.getElementById('gameMessage');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // 游戏结束
+        function endGame(winner) {
+            const winScreen = document.getElementById('winScreen');
+            const winnerName = document.getElementById('winnerName');
+            
+            winnerName.textContent = winner === 'player' ? '你赢了！🎉' : '电脑赢了！😅';
+            winScreen.style.display = 'flex';
+        }
+
+        // 重新开始
+        function restartGame() {
+            document.getElementById('winScreen').style.display = 'none';
+            startGame();
+        }
+    </script>
+</body>
+</html>
